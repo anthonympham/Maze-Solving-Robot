@@ -8,10 +8,10 @@ int motorSpeed = 50;
 int turnSpeed = 100;
 int counter = 0;
 int threshold = 750;
-int increment[5];
-int average[4];
+int increment[7];
+int average[6];
 
-unsigned int sensors[4];
+unsigned int sensors[6];
 //right wheel
 int a = 3;
 int b = 4;
@@ -43,7 +43,7 @@ void backward() {
 void left() {
   forward();
   delay(50);
-  while(sensors[1] < threshold && sensors[2] < threshold){
+  while(sensors[2] < threshold && sensors[3] < threshold){
   digitalWrite(b, LOW);
   digitalWrite(c, HIGH);
   analogWrite(a, turnSpeed);
@@ -57,7 +57,7 @@ void left() {
 void right() {
  forward();
   delay(50);
-  while(sensors[1] < threshold && sensors[2] < threshold){
+  while(sensors[2] < threshold && sensors[3] < threshold){
   digitalWrite(b, HIGH);
   digitalWrite(c, LOW);
   analogWrite(a, turnSpeed);
@@ -92,11 +92,13 @@ void setup() {
 
   //This variable will provide us the # of sets of data the sensor has read
   increment[0] = average[0] = 0;
-  increment[1] = average[1] = threshold;
+  increment[1] = average[1] = 0;
   increment[2] = average[2] = threshold;
-  increment[3] = average[3] = 0;
-  //increment 4 just records the # of cycles
-  increment[4] = 0;
+  increment[3] = average[3] = threshold;
+  increment[4] = average[4] = 0;
+  increment[5] = average[5] = 0;
+  //increment 6 just records the # of cycles
+  increment[6] = 0;
 
 
   // optional: signal that the calibration phase is now over and wait for further
@@ -113,7 +115,7 @@ void loop() {
   //counter is the no. of loops
   counter = counter + 1;
   // put your main code here, to run repeatedly: 
-  for (int h = 0; h < 4; h++) {
+  for (int h = 0; h < 6; h++) {
     increment[h] = increment[h] + sensors[h];
   }
 
@@ -126,20 +128,27 @@ void loop() {
   Serial.println(" ");
   */
   //Every 3rd loop
-  increment[4] = counter % 3;
+  increment[6] = counter % 3;
   /*
   Serial.println(counter);
   Serial.println(increment[4]);
   */
-  if (increment[4] == 0) {
-    for (int i = 0; i < 4; i++) {
+  if (increment[6] == 0) {
+    for (int i = 0; i < 6; i++) {
       average[i] = increment[i] / 3;
       increment[i] = threshold;
     }
-    if (average[0] > threshold)
-      right();
-    else if (average[1] < threshold)
-      left();
+    if (average[0] > threshold || average[1] > threshold){
+      //if actual turn, record. Else just adjust
+	  if (average[0] > threshold)
+		Serial.print("True Turn");
+	  right();
+	}
+    else if (average[2] < threshold || average[3] < threshold){
+		if (average[5] > threshold)
+			Serial.print ("True Turn);
+		left();
+	}
     //Serial.print("                          ");
     /*
     for (int k = 0; k < 4; k++) {
