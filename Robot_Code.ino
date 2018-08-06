@@ -2,13 +2,15 @@
 
 // create an object for your type of sensor (RC or Analog)
 // in this example we have three sensors on analog inputs 0 - 2, a.k.a. digital pins 14 - 16
-QTRSensorsRC qtr((char[]) {A5, A4, A3, A2, A1, A0 }, 4);
+QTRSensorsRC qtr((char[]) {A5, A4, A3, A2, A1, A0 }, 6);
 
 int motorSpeed = 50;
 int turnSpeed = 100;
 int counter = 0;
 int threshold = 750;
+//stores values of each sensor over time; last entry is for checking counter cycles
 int increment[7];
+//calculates averages of each sensor's readings
 int average[6];
 
 unsigned int sensors[6];
@@ -22,6 +24,7 @@ int e = 11;
 int f = 10;
 int g = 9;
 
+//basic forward action
 void forward() {
   digitalWrite(b, HIGH);
   digitalWrite(c, LOW);
@@ -31,6 +34,7 @@ void forward() {
   analogWrite(e, motorSpeed);
 }
 
+//might be useful eventually
 void backward() {
   digitalWrite(b, LOW);
   digitalWrite(c, HIGH);
@@ -40,6 +44,7 @@ void backward() {
   analogWrite(e, turnSpeed);
 }
 
+//Turns left until robot is centered at line
 void left() {
   forward();
   delay(50);
@@ -54,6 +59,7 @@ void left() {
   }
 }
 
+//Turns right until robot is centered at line
 void right() {
  forward();
   delay(50);
@@ -145,6 +151,7 @@ void loop() {
 	  right();
 	}
     else if (average[2] < threshold || average[3] < threshold){
+		//if actual turn, record. Else just adjust
 		if (average[5] > threshold)
 			Serial.print ("True Turn);
 		left();
