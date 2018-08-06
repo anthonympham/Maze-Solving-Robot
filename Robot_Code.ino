@@ -7,11 +7,14 @@ QTRSensorsRC qtr((char[]) {A5, A4, A3, A2, A1, A0 }, 6);
 int motorSpeed = 50;
 int turnSpeed = 100;
 int counter = 0;
+int turnCounter = 0;
 int threshold = 750;
 //stores values of each sensor over time; last entry is for checking counter cycles
 int increment[7];
 //calculates averages of each sensor's readings
 int average[6];
+//records lefts as 0 and rights as 1 (actual turns only), and 2 to mark end. 
+int recordTurns[10];
 
 unsigned int sensors[6];
 //right wheel
@@ -105,7 +108,10 @@ void setup() {
   increment[5] = average[5] = 0;
   //increment 6 just records the # of cycles
   increment[6] = 0;
-
+  
+  for (int i = 0; i < 10; i++){
+	  recordTurns i = 0;
+  }
 
   // optional: signal that the calibration phase is now over and wait for further
   // input from the user, such as a button press
@@ -146,14 +152,23 @@ void loop() {
     }
     if (average[0] > threshold || average[1] > threshold){
       //if actual turn, record. Else just adjust
-	  if (average[0] > threshold)
+	  if (average[0] > threshold){
 		Serial.print("True Turn");
+		recordTurns[turnCounter] = 1;
+		recordTurns[turnCounter+1] = 2;
+		turnCounter++;
+	  }
 	  right();
 	}
     else if (average[2] < threshold || average[3] < threshold){
 		//if actual turn, record. Else just adjust
-		if (average[5] > threshold)
+		if (average[5] > threshold){
+			recordTurns[turnCounter] = 0;
+			//sets next turn to 2
+			recordTurns[turnCounter + 1] = 2;
+			turnCounter++;	
 			Serial.print ("True Turn);
+		}
 		left();
 	}
     //Serial.print("                          ");
